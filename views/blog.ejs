@@ -28,6 +28,19 @@
       </div>
       <% }) %>
     </article>
+    <div class="page-links">
+      <div>
+        <% if(currentPage > 1) {%>
+        <!-- <a href="?page=3">次のページへ</a> -->
+        <a href="?page=<%= currentPage - 1%>">前のページへ</a>
+        <% } %>
+      </div>
+      <div>
+        <% if(currentPage < lastPage) {%>
+        <a href="?page=<%= currentPage + 1%>">次のページへ</a>
+        <% } %>
+      </div>
+    </div>
   </div>
 
   <!-- サイドバー -->
