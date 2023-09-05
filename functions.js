@@ -98,11 +98,34 @@ function saveEntry(date, title, content) {
   fs.writeFileSync(path.join(entriesDir, date + '.txt'), title + '\n' + content);
 }
 
+// 指定したブログ記事データをentriesフォルダから削除
+function deleteEntry(date){
+  fs.unlinkSync(path.join(entriesDir, date + '.txt'));
+}
+
+// yyyymmddの日付の年月日毎にハイフンを入れる
+function convertDateFormat(yyyymmdd){
+  return [yyyymmdd.substr(0, 4), yyyymmdd.substr(4, 2), yyyymmdd.substr(6, 2)].join('-');
+}
+
+// 日付文字列を取得（引数省略時は本日の日付）
+function getDateString(date = new Date()){
+  const ymd = [
+    date.getFullYear(),
+    ('0' + (date.getMonth() + 1)).substr(-2),
+    ('0' + date.getDate()).substr(-2)
+  ].join('');
+  return ymd;
+}
+
 // 外部ファイルから参照できる関数の公開設定
 module.exports = {
   getEntryFiles,
   fileNameToEntry,
   getEntries,
   getSideList,
-  saveEntry
+  saveEntry,
+  convertDateFormat,
+  getDateString,
+  deleteEntry
 };

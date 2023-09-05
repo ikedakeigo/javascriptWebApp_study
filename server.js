@@ -12,6 +12,9 @@ app.use(express.static("public"));
 // テンプレートエンジン設定
 app.set("view engine", "ejs");
 
+// テンプレート内で使用する関数の登録
+app.locals.convertDateFormat = func.convertDateFormat;
+
 // POSTリクエストのパラメータを取得するための設定
 app.use(express.urlencoded({ extended: false}));
 
@@ -73,24 +76,46 @@ app.get('/admin/', (request, response) => {
   // メインコンテンツに表示するブログ記事
   const entries = func.getEntries(files);
 
-  response.render('admin', { entries });
+  response.render('admin', {
+    entries,
+    hasTodayEntry: files.indexOf(func.getDateString() + '.txt') !== -1,
+  });
+
 })
 
 app.get('/admin/edit', (request, response) => {
-  response.render('edit');
+
+  // 新規登録の場合は記事投稿ページの内容は全て空にする(dateは自動設定)
+  let entry = {
+    date: func.getDateString(),
+    title: '',
+    content: '',
+    };
+
+  let lastTitle = '記事の新規投稿'
+
+    // dateパラメータありの場合は記事の編集なので該当の記事データを取得してセットする
+    if(request.query.date){
+      entry = func.fileNameToEntry(request.query.date + '.txt', false);
+      pageTitle = '記事の編集(' + func.convertDateFormat(entry.date) + ')';
+    }
+
+    response.render('edit', {
+      entry,
+      pageTitle,
+    });
 })
 
 app.post('/admin/post_entry', (request, response) => {
   // console.log(request.body);
   // response.send('OK');
-  const date = new Date();
-  const ymd = [
-    date.getFullYear(),
-    ('0' + (date.getMonth() + 1)).substr(-2),
-    ('0' + date.getDate()).substr(-2)
-  ].join('');
-  func.saveEntry(ymd, request.body.title, request.body.content);
-  response.redirect('/blog/');
+  func.saveEntry(request.body.date, request.body.title, request.body.content);
+  response.redirect('/admin/');
+})
+
+app.post('/admin/delete_entry', (request, response) => {
+  func.deleteEntry(request.body.date);
+  response.redirect('/admin/');
 })
 
 // Expressサーバー起動
