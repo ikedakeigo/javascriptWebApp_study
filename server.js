@@ -12,6 +12,9 @@ app.use(express.static("public"));
 // テンプレートエンジン設定
 app.set("view engine", "ejs");
 
+// POSTリクエストのパラメータを取得するための設定
+app.use(express.urlencoded({ extended: false}));
+
 // ルーティング設定
 app.get("/blog/", (request, response) => {
 
@@ -68,7 +71,28 @@ app.get('/admin/edit', (request, response) => {
   response.render('edit');
 })
 
+app.post('/admin/post_entry', (request, response) => {
+  // console.log(request.body);
+  // response.send('OK');
+  const date = new Date();
+  const ymd = [
+    date.getFullYear(),
+    ('0' + (date.getMonth() + 1)).substr(-2),
+    ('0' + date.getDate()).substr(-2)
+  ].join('');
+  func.saveEntry(ymd, request.body.title, request.body.content);
+  response.redirect('/blog/');
+})
+
 // Expressサーバー起動
 const server = app.listen(15864, () => {
   console.log("Listening on http://127.0.0.1:" + server.address().port + "/");
 });
+
+
+// Expressで処理される前の通信生データを表示
+// server.on('connection', (socket) => {
+//   socket.on('data', (data) => {
+//     console.log(data.toString());
+//   })
+// })
