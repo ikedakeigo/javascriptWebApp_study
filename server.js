@@ -139,6 +139,22 @@ app.post('/admin/delete_entry', (request, response) => {
   response.redirect('/admin/');
 })
 
+
+app.post('/admin/change_password', (request, response) => {
+  const { password, password_verify } = request.body;
+  if (password.length < 8) {
+    response.send('パスワードは8文字以上にしてください。');
+    return;
+  }
+  if (password !== password_verify){
+    response.send('確認用のパスワードが異なります。');
+    return;
+  }
+  const hashed = bcrypt.hashSync(password);
+  func.savePassword(hashed);
+  response.send('パスワードの変更ができました。');
+});
+
 // Expressサーバー起動
 const server = app.listen(15864, () => {
   console.log("Listening on http://127.0.0.1:" + server.address().port + "/");
