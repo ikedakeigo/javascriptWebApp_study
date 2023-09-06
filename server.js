@@ -1,5 +1,10 @@
 // Expressサーバーパッケージを読み込み
 const express = require("express");
+
+
+//  パスワードハッシュ化パッケージを読み込み
+const bcrypt = require('bcryptjs');
+
 // 同じフォルダにあるfunctions.jsを読み込み
 const func = require("./functions");
 
@@ -70,6 +75,22 @@ app.get("/blog/:date", (request, response) => {
   });
 });
 
+app.get('/login/', (request, response) => {
+  response.render('login', {
+    message: (request.query.failed)? 'ログインできませんでした。': ''
+  });
+});
+
+app.post('/auth', (request, response) => {
+  // if (request.body.password === 'password'){
+  const hashed = func.loadPassword();
+  if (hashed && bcrypt.compareSync(request.body.password, hashed)){
+    response.redirect('/admin/');
+  }else {
+    response.redirect('/login/?failed=1');
+  }
+});
+
 app.get('/admin/', (request, response) => {
   // ブログ記事ファイル一覧取得
   const files = func.getEntryFiles();
@@ -117,6 +138,22 @@ app.post('/admin/delete_entry', (request, response) => {
   func.deleteEntry(request.body.date);
   response.redirect('/admin/');
 })
+
+
+app.post('/admin/change_password', (request, response) => {
+  const { password, password_verify } = request.body;
+  if (password.length < 8) {
+    response.send('パスワードは8文字以上にしてください。');
+    return;
+  }
+  if (password !== password_verify){
+    response.send('確認用のパスワードが異なります。');
+    return;
+  }
+  const hashed = bcrypt.hashSync(password);
+  func.savePassword(hashed);
+  response.send('パスワードの変更ができました。');
+});
 
 // Expressサーバー起動
 const server = app.listen(15864, () => {
