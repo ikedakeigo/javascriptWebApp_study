@@ -104,10 +104,16 @@ app.post('/auth', (request, response) => {
   }
 });
 
+app.get('/logout', (request, response) => {
+  console.log(sessionId);
+  sessionId = null;
+  response.redirect('/login/');
+});
+
 app.use('/admin/', (request, response, next) => {
   // デバッグ用コンソール
   // console.log(request.cookies.session);
-  
+
   // Cookieのsessionの値が'login_ok'でなければログイン画面に戻す
   // if (request.cookies.session === 'login_ok') {
     if(sessionId && request.cookies.session === sessionId ){
