@@ -1,3 +1,7 @@
+// cookieに保存されたsessionの値をアラートで表示
+// alert(document.cookie);
+
+
 // 記事削除
 const deleteLinks = document.querySelectorAll('[data-delete]');
 const deleteForm = document.querySelector('form[name=delete]');
