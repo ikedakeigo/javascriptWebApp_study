@@ -1,3 +1,6 @@
+// Node.js内蔵のファイルパス関連モジュールを読み込み
+const path = require('path');
+
 // Expressサーバーパッケージを読み込み
 const express = require("express");
 
@@ -29,6 +32,11 @@ app.use(express.urlencoded({ extended: false}));
 // ブラウザから送信されたきたクッキーを取得するための設定
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
+
+// アップロードされたファイルを取得するための設定
+const fileUpload = require('express-fileupload');
+const { fdatasync } = require('fs');
+app.use(fileUpload());
 
 // ルーティング設定
 app.get("/blog/", (request, response) => {
@@ -149,6 +157,7 @@ app.get('/admin/edit', (request, response) => {
     date: func.getDateString(),
     title: '',
     content: '',
+    image: null,
     };
 
   let pageTitle = '記事の新規投稿'
@@ -166,10 +175,34 @@ app.get('/admin/edit', (request, response) => {
 })
 
 app.post('/admin/post_entry', (request, response) => {
-  // console.log(request.body);
-  // response.send('OK');
-  func.saveEntry(request.body.date, request.body.title, request.body.content);
-  response.redirect('/admin/');
+  const { date, title, content, imgdel } = request.body;
+  func.saveEntry(date, title, content, imgdel);
+  // ファイルがアップロードされているかチェック
+  if(!request.files){
+    response.redirect('/admin/');
+    return;
+  }
+
+
+
+  // アップロードされたファイルが画像かチェック
+  const {image} = request.files;
+  if(!image.mimetype.startsWith('image/')){
+    response.redirect('/admin/');
+    return;
+  }
+
+  // 既存のアップロードファイルを削除
+  func.deleteImage(date);
+
+  // アップロードされたファイルを保存
+  const saveDir = func.createImageDir(date);
+  image.mv(path.join(saveDir, image.name), (err) =>{
+    if(err){
+      console.log(err);
+    }
+    response.redirect('/admin/');
+  } );
 })
 
 app.post('/admin/delete_entry', (request, response) => {
