@@ -12,7 +12,7 @@
 
     <section>
       <h2><%= pageTitle %></h2>
-      <form name="edit" action="/admin/post_entry" method="post">
+      <form name="edit" action="/admin/post_entry" method="post" enctype="multipart/form-data">
         <div>
           <h3>タイトル</h3>
           <input type="text" name="title" value="<%= entry.title %>" />
@@ -22,6 +22,20 @@
           <textarea name="content">
             <%= entry.content %>
           </textarea>
+        </div>
+        <div>
+          <h3>画像</h3>
+          <% if(entry.image) {%>
+            <div>
+              <label class="checkbox-label">
+                <input type="checkbox" name="imgdel" value="1">
+                <span>この画像を削除する</span>
+              </label>
+            </div>
+            <img class="image" src="/images/<%= entry.date %>/<%= entry.image %>"  alt="投稿写真">
+            <h4>別の画像に差し替える</h4>
+          <% } %>
+          <input type="file" name="image" accept="image/*">
         </div>
         <div class="form-buttons">
           <input type="hidden" name="date" value="<%= entry.date %>">
