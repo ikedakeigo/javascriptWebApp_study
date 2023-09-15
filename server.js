@@ -122,7 +122,7 @@ app.use('/admin/', (request, response, next) => {
     next();
   } else {
     response.redirect('/login');
-    console.log('NO');
+    console.log('ログイン画面です');
   }
 });
 
