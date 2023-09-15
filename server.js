@@ -88,15 +88,16 @@ app.get('/login/', (request, response) => {
   });
 });
 
-let sessionId = null;
+// let sessionId = null;
 app.post('/auth', (request, response) => {
   // if (request.body.password === 'password'){
   const hashed = func.loadPassword();
   if (hashed && bcrypt.compareSync(request.body.password, hashed)){
     // response.cookie('session', 'login_ok');
-    sessionId = cryptoRandomString({
+    const sessionId = cryptoRandomString({
       length: 100
     });
+    func.saveSessionId(sessionId);
     response.cookie('session', sessionId, {
       httpOnly: true,
     });
@@ -107,14 +108,16 @@ app.post('/auth', (request, response) => {
 });
 
 app.get('/logout', (request, response) => {
-  console.log(sessionId);
-  sessionId = null;
+  // sessionId = null;
+  func.deleteSessionId();
   response.redirect('/login/');
 });
 
 app.use('/admin/', (request, response, next) => {
   // デバッグ用コンソール
   // console.log(request.cookies.session);
+
+  const sessionId = func.loadSessionId();
 
   // Cookieのsessionの値が'login_ok'でなければログイン画面に戻す
   // if (request.cookies.session === 'login_ok') {
