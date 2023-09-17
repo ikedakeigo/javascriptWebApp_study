@@ -83,11 +83,24 @@ app.get("/blog/:date", (request, response) => {
   const sideList = func.getSideList(entries);
 
   // ブログ記事を取得してテンプレートに渡して出力したHTMLをクライアントに送信
-  const entry = func.fileNameToEntry(request.params.date + ".txt", false);
+  // const entry = func.fileNameToEntry(request.params.date + ".txt", false);
+  const { date } = request.params;
+  const entry = func.fileNameToEntry(date + '.txt', false);
+  const commentList = func.getCommentList(date);
   response.render("entry", {
     entry,
+    commentList,
     sideList,
   });
+});
+
+app.post('/blog/:date/post_comment', (request, response) => {
+  const { date } = request.params;
+  const { comment } = request.body;
+  if (comment) {
+    func.saveComment(date, comment);
+  }
+  response.redirect('/blog/' + date);
 });
 
 app.get('/login/', (request, response) => {
