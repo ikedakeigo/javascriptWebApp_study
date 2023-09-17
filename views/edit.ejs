@@ -44,5 +44,40 @@
         </div>
       </form>
     </section>
+
+    <% if(commentList) {%>
+      <section>
+        <hr>
+        <p class="info">※記事の投稿とコメントの削除を同時に送信することはできません。</p>
+        <h2>コメント管理</h2>
+        <form action="/admin/delete_comment" method="post" name="comment">
+          <table id="comment-list">
+            <tr>
+              <th>投稿日時</th>
+              <th>コメント</th>
+              <th>削除</th>
+            </tr>
+            <% commentList.forEach((comment) => { %>
+              <tr>
+                <td class="posted">
+                  <%= comment.posted %>
+                </td>
+                <td>
+                  <%= comment.comment %>
+                </td>
+                <td class="operation-column">
+                  <input type="checkbox" name="id[]" value="<%= comment.id %>">
+                </td>
+              </tr>
+              <% })%>
+          </table>
+          <label>チェックを入れたコメントを一括に削除します。</label>
+          <input type="hidden" name="date" value="<%= entry.date %>">
+          <input type="submit" value="削除実行">
+        </form>
+      </section>
+    <% } %>
+
+    <script src="/edit.js"></script>
   </body>
 </html>

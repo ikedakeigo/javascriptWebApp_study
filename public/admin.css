@@ -26,6 +26,7 @@ table {
   width: 100%;
   border: solid 1px #222;
   border-collapse: collapse;
+  margin-bottom: 20px;
 }
 
 /* 記事リストの各セル */
@@ -39,6 +40,14 @@ table td {
 table .operation-column {
   display: flex;
   justify-content: space-around;
+}
+
+ /* コメントリストの項目 */
+ #comment-list .posted {
+  width: 20ch;
+}
+#comment-list .comment-delete {
+  width: 5ch;
 }
 
 /* ブログ記事投稿ページのタイトルと本文 */

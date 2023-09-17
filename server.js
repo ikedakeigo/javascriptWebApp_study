@@ -27,7 +27,7 @@ app.set("view engine", "ejs");
 app.locals.convertDateFormat = func.convertDateFormat;
 
 // POSTリクエストのパラメータを取得するための設定
-app.use(express.urlencoded({ extended: false}));
+app.use(express.urlencoded({ extended: true}));
 
 // ブラウザから送信されたきたクッキーを取得するための設定
 const cookieParser = require('cookie-parser');
@@ -83,11 +83,24 @@ app.get("/blog/:date", (request, response) => {
   const sideList = func.getSideList(entries);
 
   // ブログ記事を取得してテンプレートに渡して出力したHTMLをクライアントに送信
-  const entry = func.fileNameToEntry(request.params.date + ".txt", false);
+  // const entry = func.fileNameToEntry(request.params.date + ".txt", false);
+  const { date } = request.params;
+  const entry = func.fileNameToEntry(date + '.txt', false);
+  const commentList = func.getCommentList(date);
   response.render("entry", {
     entry,
+    commentList,
     sideList,
   });
+});
+
+app.post('/blog/:date/post_comment', (request, response) => {
+  const { date } = request.params;
+  const { comment } = request.body;
+  if (comment) {
+    func.saveComment(date, comment);
+  }
+  response.redirect('/blog/' + date);
 });
 
 app.get('/login/', (request, response) => {
@@ -161,16 +174,19 @@ app.get('/admin/edit', (request, response) => {
     };
 
   let pageTitle = '記事の新規投稿'
+  let commentList = null;
 
     // dateパラメータありの場合は記事の編集なので該当の記事データを取得してセットする
     if(request.query.date){
       entry = func.fileNameToEntry(request.query.date + '.txt', false);
       pageTitle = '記事の編集(' + func.convertDateFormat(entry.date) + ')';
+      commentList = func.getCommentList(entry.date);
     }
 
     response.render('edit', {
       entry,
       pageTitle,
+      commentList,
     });
 })
 
@@ -224,6 +240,13 @@ app.post('/admin/change_password', (request, response) => {
   const hashed = bcrypt.hashSync(password);
   func.savePassword(hashed);
   response.send('パスワードの変更ができました。');
+});
+
+app.post('/admin/delete_comment', (request, response) => {
+  const { date, id} = request.body;
+  console.log(date, id);
+  func.deleteComment(date, id);
+  response.redirect('/admin/edit?date=' + date);
 });
 
 // Expressサーバー起動
